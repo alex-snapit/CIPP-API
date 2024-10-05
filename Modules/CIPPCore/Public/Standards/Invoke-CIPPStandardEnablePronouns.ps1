@@ -1,9 +1,33 @@
 function Invoke-CIPPStandardEnablePronouns {
     <#
     .FUNCTIONALITY
-    Internal
+        Internal
+    .COMPONENT
+        (APIName) EnablePronouns
+    .SYNOPSIS
+        (Label) Enable Pronouns
+    .DESCRIPTION
+        (Helptext) Enables the Pronouns feature for the tenant. This allows users to set their pronouns in their profile.
+        (DocsDescription) Enables the Pronouns feature for the tenant. This allows users to set their pronouns in their profile.
+    .NOTES
+        CAT
+            Global Standards
+        TAG
+            "lowimpact"
+        ADDEDCOMPONENT
+        IMPACT
+            Low Impact
+        POWERSHELLEQUIVALENT
+            Update-MgBetaAdminPeoplePronoun -IsEnabledInOrganization:\$true
+        RECOMMENDEDBY
+        UPDATECOMMENTBLOCK
+            Run the Tools\Update-StandardsComments.ps1 script to update this comment block
+    .LINK
+        https://docs.cipp.app/user-documentation/tenant/standards/edit-standards
     #>
+
     param ($Tenant, $Settings)
+    ##$Rerun -Type Standard -Tenant $Tenant -Settings $Settings 'EnablePronouns'
 
     $Uri = 'https://graph.microsoft.com/v1.0/admin/people/pronouns'
     try {
@@ -11,7 +35,7 @@ function Invoke-CIPPStandardEnablePronouns {
     } catch {
         $ErrorMessage = Get-NormalizedError -Message $_.Exception.Message
         Write-LogMessage -API 'Standards' -tenant $Tenant -message "Could not get CurrentState for Pronouns. Error: $ErrorMessage" -sev Error
-        Exit
+        Return
     }
     Write-Host $CurrentState
 
@@ -34,19 +58,16 @@ function Invoke-CIPPStandardEnablePronouns {
     }
 
     if ($Settings.alert -eq $true) {
-            
+
         if ($CurrentState.isEnabledInOrganization -eq $true) {
             Write-LogMessage -API 'Standards' -tenant $tenant -message 'Pronouns are enabled.' -sev Info
         } else {
             Write-LogMessage -API 'Standards' -tenant $tenant -message 'Pronouns are not enabled.' -sev Alert
         }
-        
     }
 
     if ($Settings.report -eq $true) {
-            
-        Add-CIPPBPAField -FieldName 'PronounsEnabled' -FieldValue $CurrentState.isEnabledInOrganization -StoreAs bool -Tenant $tenant
-        
-    }
 
+        Add-CIPPBPAField -FieldName 'PronounsEnabled' -FieldValue $CurrentState.isEnabledInOrganization -StoreAs bool -Tenant $tenant
+    }
 }
